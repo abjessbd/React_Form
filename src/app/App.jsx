@@ -22,6 +22,7 @@ const init = {
         focus: false
     }
 };
+
 const App = () => {
     const [state, setState] = useState({ ...init });
 
