@@ -1,41 +1,26 @@
-import { useState } from "react";
-import InputGroup from "../components/shared/forms/InputGroup";
-import Section from "../components/UI/sections/Section";
-import Button from "../components/UI/buttons/Button";
-import { deepClone } from "../utils/objectUtils";
-import { makeStateToValues } from "../utils/makeStateToValues";
-
-const init = {
-    title: {
-        value: '',
-        error: '',
-        focus: false
-    },
-    bio: {
-        value: '',
-        error: '',
-        focus: false
-    },
-    skills: {
-        value: '',
-        error: '',
-        focus: false
-    }
-};
+import React from 'react';
+import Section from '../components/UI/sections/Section';
+import InputGroup from '../components/shared/forms/InputGroup';
+import Button from '../components/UI/buttons/Button';
+import useForm from '../hooks/useForm';
 
 const App = () => {
-    const [state, setState] = useState({ ...init });
+    const init = {
+        title: '',
+        bio: '',
+        skills: ''
+    };
 
-    const validityCheck = (values) => {
+    const validate = (values) => {
         const errors = {};
         if (!values.title) {
-            errors.title = 'Invalid title';
+            errors.title = 'Title is required';
         }
         if (!values.bio) {
-            errors.bio = 'Invalid bio';
+            errors.bio = 'Bio is required';
         }
         if (!values.skills) {
-            errors.skills = 'Invalid skills';
+            errors.skills = 'Skills is required';
         }
         return {
             errors,
@@ -43,77 +28,17 @@ const App = () => {
         };
     };
 
-    const handleChange = (e) => {
-        const { name: key, value } = e.target;
-
-        const oldState = deepClone(state);
-        const values = makeStateToValues(oldState, state);
-        oldState[key].value = value;
-
-        const { errors } = validityCheck(values);
-        if (oldState[key].error && errors[key]) {
-            oldState[key].error = errors[key];
-        } else {
-            oldState[key].error = '';
-        }
-
-        setState(oldState);
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        const oldState = deepClone(state);
-        const values = makeStateToValues(oldState, state);
-
-        const { isValid, errors } = validityCheck(values);
-        if (isValid) {
-            console.log('Form Submitted Successfully:', values);
-        } else {
-            Object.keys(oldState).forEach((key) => {
-                if (errors[key]) {
-                    oldState[key].error = errors[key];
-                } else {
-                    oldState[key].error = '';
-                }
-            });
-        }
-
-        setState(oldState);
-    };
-
-    const handleFocus = (e) => {
-        const key = e.target.name;
-        const oldState = deepClone(state);
-        oldState[key].focus = true;
-        setState(oldState);
-    };
-
-    const handleBlur = (e) => {
-        const key = e.target.name;
-
-        const oldState = deepClone(state);
-        const values = makeStateToValues(oldState, state);
-
-        const { errors } = validityCheck(values);
-        if (oldState[key].focus && errors[key]) {
-            oldState[key].error = errors[key];
-        } else {
-            oldState[key].error = '';
-        }
-
-        setState(oldState);
-    };
+    const { state, handleChange, handleFocus, handleBlur, handleSubmit } = useForm({ init, validate });
 
     return (
         <Section>
             <div style={{ padding: '1rem' }}>
                 <h1 style={{ fontSize: '2.5rem', marginTop: '1rem', marginBottom: '2rem', textAlign: 'center' }}>React Form</h1>
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={(e) => handleSubmit(e, init)}>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <InputGroup title={'Title'} name={'title'} placeholder={'Softwere Engineer'} value={state.title.value} onchange={handleChange} onfocus={handleFocus} onblur={handleBlur} error={state.title.error} />
-                        <InputGroup title={'Bio'} name={'bio'} placeholder={'I am a Softwere Engineer'} value={state.bio.value} onchange={handleChange} onfocus={handleFocus} onblur={handleBlur} error={state.bio.error} />
-                        <InputGroup title={'Skills'} name={'skills'} placeholder={'JavaScript, React'} value={state.skills.value} onchange={handleChange} onfocus={handleFocus} onblur={handleBlur} error={state.skills.error} />
+                        <InputGroup title={'Title'} name={'title'} placeholder={'Softwere Engineer'} value={state.title.value} onchange={handleChange} error={state.title.error} onfocus={handleFocus} onblur={handleBlur} />
+                        <InputGroup title={'Bio'} name={'bio'} placeholder={'I am a Softwere Engineer'} value={state.bio.value} onchange={handleChange} error={state.bio.error} onfocus={handleFocus} onblur={handleBlur} />
+                        <InputGroup title={'Skills'} name={'skills'} placeholder={'JavaScript, React'} value={state.skills.value} onchange={handleChange} error={state.skills.error} onfocus={handleFocus} onblur={handleBlur} />
                     </div>
                     <Button type="submit" style={{ marginTop: '1rem' }}>Submit</Button>
                 </form>
